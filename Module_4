@@ -60,3 +60,15 @@ Result:
 { "totalPassengers" : 13152753, "location" : { "state" : "Arizona", "city" : "Phoenix, AZ" } }
 { "totalPassengers" : 571452, "location" : { "state" : "Arkansas", "city" : "Little Rock, AR" } }
 { "totalPassengers" : 23701556, "location" : { "state" : "California", "city" : "Los Angeles, CA" } }
+
+Which pair of people have the greatest number of messages in the dataset? 
+ db.enron.aggregate([
+     {"$addFields": { "headers.To":  {"$setUnion": ["$headers.To", []] } } },
+     { $unwind:"$headers.To" },
+     { $group: { _id: { from: "$headers.From" } , To:{ $push:"$headers.To" } } },
+     { $unwind:"$To" },
+     { $group: { _id: { from: "$_id.from"  , To:"$To" },  messages: { $sum: 1 } } },
+     { $sort: { messages: -1 } },
+     { $limit: 1 }
+ ])
+{ "_id" : { "from" : "susan.mara@enron.com", "To" : "jeff.dasovich@enron.com" }, "messages" : 750 }
