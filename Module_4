@@ -40,3 +40,22 @@ Result:
 { "_id" : "Meridiana S.p.A", "total" : 20308 }
 { "_id" : "Norwegian Air Shuttle ASA", "total" : 13344 }
 { "_id" : "VistaJet Limited", "total" : 183 }
+5.Find the city (originCity) with the highest sum of passengers for each state (originState)
+of the United States (originCountry). Provide the city for the first 5 states ordered by state
+alphabetically (you should see the city for Alaska, Arizona and etc). Show result as {
+"totalPassengers" : 999, "location" : { "state" : "abc", "city" : "xyz"
+} }
+Query: db.airlines.aggregate([
+     { $match:{ originCountry: "United States"  } },
+     { $group: { _id: { city: "$originCity", originState: "$originState" }, passengers: { $sum: "$passengers" } } },
+     { $group: { _id: { originState: "$_id.originState" },  passengers:{ $first:"$passengers" }, city: { $first:"$_id.city" } } } ,
+     { $sort: { "_id.originState":1, passengers: -1 } },
+     { $limit: 5 },
+     { $project: { _id:0, totalPassengers: "$passengers", location: {state:"$_id.originState", city: "$city" } } }
+])
+{ "totalPassengers" : 3830, "location" : { "state" : "Alabama", "city" : "Muscle Shoals, AL" } }
+{ "totalPassengers" : 57, "location" : { "state" : "Alaska", "city" : "Tanacross, AK" } }
+{ "totalPassengers" : 3542, "location" : { "state" : "Arizona", "city" : "Prescott, AZ" } }
+{ "totalPassengers" : 17, "location" : { "state" : "Arkansas", "city" : "Rogers, AR" } }
+{ "totalPassengers" : 9, "location" : { "state" : "California", "city" : "Brawley, CA" } }
+
