@@ -45,17 +45,18 @@ of the United States (originCountry). Provide the city for the first 5 states or
 alphabetically (you should see the city for Alaska, Arizona and etc). Show result as {
 "totalPassengers" : 999, "location" : { "state" : "abc", "city" : "xyz"
 } }
-Query: db.airlines.aggregate([
+db.airlines.aggregate([
      { $match:{ originCountry: "United States"  } },
-     { $group: { _id: { city: "$originCity", originState: "$originState" }, passengers: { $sum: "$passengers" } } },
-     { $group: { _id: { originState: "$_id.originState" },  passengers:{ $first:"$passengers" }, city: { $first:"$_id.city" } } } ,
-     { $sort: { "_id.originState":1, passengers: -1 } },
+     { $group: { _id: { originCity: "$originCity", originState: "$originState" }, passengers: { $sum: "$passengers" } } },
+     { $sort: { passengers: -1 } },
+     { $group: { _id: { originState: "$_id.originState" },  passengers:{ $first:"$passengers" }, originCity: { $first:"$_id.originCity" } } },
+     { $sort: { "_id.originState":1 } },
      { $limit: 5 },
-     { $project: { _id:0, totalPassengers: "$passengers", location: {state:"$_id.originState", city: "$city" } } }
+     { $project: { _id:0, totalPassengers: "$passengers", location: {state:"$_id.originState", city: "$originCity" } } }
 ])
-{ "totalPassengers" : 3830, "location" : { "state" : "Alabama", "city" : "Muscle Shoals, AL" } }
-{ "totalPassengers" : 57, "location" : { "state" : "Alaska", "city" : "Tanacross, AK" } }
-{ "totalPassengers" : 3542, "location" : { "state" : "Arizona", "city" : "Prescott, AZ" } }
-{ "totalPassengers" : 17, "location" : { "state" : "Arkansas", "city" : "Rogers, AR" } }
-{ "totalPassengers" : 9, "location" : { "state" : "California", "city" : "Brawley, CA" } }
-
+Result:
+{ "totalPassengers" : 760120, "location" : { "state" : "Alabama", "city" : "Birmingham, AL" } }
+{ "totalPassengers" : 1472404, "location" : { "state" : "Alaska", "city" : "Anchorage, AK" } }
+{ "totalPassengers" : 13152753, "location" : { "state" : "Arizona", "city" : "Phoenix, AZ" } }
+{ "totalPassengers" : 571452, "location" : { "state" : "Arkansas", "city" : "Little Rock, AR" } }
+{ "totalPassengers" : 23701556, "location" : { "state" : "California", "city" : "Los Angeles, CA" } }
